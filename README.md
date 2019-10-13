@@ -1,6 +1,12 @@
 # MarkovTweeter
 A generic library that generates tweets using Markov Chains based on an existing twitter feed. I've personally set this up as a cron job.
 
+There are three public functions in the script that you can trigger:
+
+* the keyword `read` will collect up to 200 tweets from any public Twitter account.
+* the keyword `send` will send a generated tweet.
+* the keyword `test` will verify that the setup criteria are met, both Twitter auth and Markov chain-based generation.
+
 ## Read tweets
 TODO
 
