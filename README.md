@@ -7,8 +7,15 @@ There are three public functions in the script that you can trigger:
 * the keyword `send` will send a generated tweet.
 * the keyword `test` will verify that the setup criteria are met, both Twitter auth and Markov chain-based generation.
 
+## Installation instructions
+This tool requires `npm` and `node` to be installed.
+
+1. Install the Twit library: `npm install twit`
+2. Rita is required for out of the box markov chain generation: `npm install rita`
+
 ## Read tweets
-TODO
+`index.js read [username] [file for storing tweets found, one per line] [start_number] [consumer_key] [consumer_secret] [access_token] [access_token_secret]`
+This function will output the highest id found to STDOUT.
 
 
 ## Send a generated tweet
