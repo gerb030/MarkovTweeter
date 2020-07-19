@@ -9,15 +9,19 @@ var bot = new Twit({
     access_token_secret: process.argv[8],
     timeout_ms: 10 * 1000
 });
-function readAndStoreTweets(bot, twitterSourceUsername, targetFilename) {
+function readAndStoreTweets(bot, twitterSourceUsername, targetFilename, maxId) {
     var options = { screen_name: twitterSourceUsername,
-                    count: 1000, max_id: 0 };
+                    include_rts: false,
+                    exclude_replies: true,
+                    trim_user: true,
+                    count: 200, 
+                    max_id: maxId };
     bot.get('statuses/user_timeline', options, function(err, data) {
         var tweetStream = "";  
-        var highest_id = 0; 
-        for (var i = 0; i < data.length ; i++) {
-            console.log(data);
+        var highest_id = null;
+        for (var i = 1; i < data.length ; i++) {
             var line = data[i].text;
+            console.log(data[i].created_at);
             line = line.replace(/@\w+/g, "");
             line = line.replace(/^\s+/g, "");
             var patt = new RegExp(/[\?!;.,]{1}/);
@@ -25,20 +29,20 @@ function readAndStoreTweets(bot, twitterSourceUsername, targetFilename) {
                 line += ".";
             }
             tweetStream += line + "\n";
-            highest_id = data[i].id_str;
+            if (highest_id == null || data[i].id < highest_id) {
+                highest_id = data[i].id;
+            }
         }
-        console.log("Highest id = "+highest_id);
+        console.log(highest_id);
         fs.appendFile(targetFilename, tweetStream, err => {
             if (err) {
-            console.error(err)
-            return
+                console.error(err)
+                return
             }
         })
     })
 }
-function sendTweet(filename, bot) {
-    
-}
+
 
 function callbackSendTweet(bot, sentence) {
     bot.post('statuses/update', {status: sentence}, function(err, data, response) {
@@ -68,16 +72,16 @@ function generateSentence(filename, callback, callbackParam, minLength, maxLengt
     });
 }
 
-// var rm = new rita.RiMarkov(2);
-// rm.loadText("The girl went to a game after dinner. The teacher went to dinner with a girl. The dog went to town for dinner. ");
-//var sentences = rm.generateSentences(1);
-//console.log(sentences[0]);
-//
+/*
+Central controller
+*/
 var twitterSourceUsername = process.argv[3];
 var filename = process.argv[4];
+var maxId = process.argv[9] == undefined ? 1 : process.argv[9]; 
+
 switch(process.argv[2]) {
 case 'read':
-        readAndStoreTweets(bot, twitterSourceUsername, filename);
+        readAndStoreTweets(bot, twitterSourceUsername, filename, maxId);
         break;
     case 'send':
         generateSentence(filename, callbackSendTweet, bot, 12, 160);
